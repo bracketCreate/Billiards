@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Sports Bracket Generator</title>
+<title>Match Generator</title>
 </head>
 <body>
-<h1>Sports Bracket Generator</h1>
+<h1>Match Generator</h1>
 <form onsubmit="return generate()">
 <input type="number" id="entries" name="entries" placeholder="Number of entries">
 <input type="submit" value="Generate">
@@ -33,7 +33,7 @@ function generate() {
   }
 
   // Create bracket visualization
-  var bracketHTML = "<h2>Bracket</h2><ul>";
+  var bracketHTML = "<h2>Matches</h2><ul>";
   for (var round = 0; round < pairs.length; round++) {
     var match = pairs[round];
     var entry1 = match[0];

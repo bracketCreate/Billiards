@@ -5,28 +5,52 @@
 </head>
 <body>
 <h1>Sports Bracket Generator</h1>
-<form action="/generate" method="post">
-<input type="number" name="entries" placeholder="Number of entries">
+<form onsubmit="return generate()">
+<input type="number" id="entries" name="entries" placeholder="Number of entries">
 <input type="submit" value="Generate">
 </form>
+<div id="bracket"></div>
 <script>
 function generate() {
-var entries = document.getElementById("entries").value;
-var pairs = [];
-for (var i = 0; i < entries; i++) {
-var opponent = Math.floor(Math.random() * entries);
-if (opponent == i) {
-opponent = (opponent + 1) % entries;
-}
-pairs.push([i, opponent]);
-}
-if (entries % 2 == 1) {
-// Add a bye
-pairs.push([entries - 1, -1]);
-}
-document.getElementById("pairs").innerHTML = pairs.join(", ");
+  var entries = parseInt(document.getElementById("entries").value);
+  var pairs = [];
+  
+  // Generate pairs
+  var availableEntries = Array.from({ length: entries }, (_, i) => i + 1);
+  while (availableEntries.length > 1) {
+    var entry1Index = Math.floor(Math.random() * availableEntries.length);
+    var entry1 = availableEntries.splice(entry1Index, 1)[0];
+    
+    var entry2Index = Math.floor(Math.random() * availableEntries.length);
+    var entry2 = availableEntries.splice(entry2Index, 1)[0];
+
+    pairs.push([entry1, entry2]);
+  }
+
+  if (availableEntries.length === 1) {
+    // Add a bye
+    pairs.push([availableEntries[0], -1]);
+  }
+
+  // Create bracket visualization
+  var bracketHTML = "<h2>Bracket</h2><ul>";
+  for (var round = 0; round < pairs.length; round++) {
+    var match = pairs[round];
+    var entry1 = match[0];
+    var entry2 = match[1];
+
+    var entry1Text = entry1 === -1 ? "Bye" : "Entry " + entry1;
+    var entry2Text = entry2 === -1 ? "Bye" : "Entry " + entry2;
+
+    bracketHTML += "<li>Match " + (round + 1) + ": " + entry1Text + " vs " + entry2Text + "</li>";
+  }
+  bracketHTML += "</ul>";
+
+  document.getElementById("bracket").innerHTML = bracketHTML;
+
+  // Prevent form submission
+  return false;
 }
 </script>
-<div id="pairs"></div>
 </body>
 </html>

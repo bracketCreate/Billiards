@@ -1,20 +1,188 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Match Generator</title>
+<title>Sports Bracket Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-image: url("your-background-image-url.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  label {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    max-width: 200px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  #nameList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  #nameList div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    max-width: 300px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  button {
+    padding: 5px 10px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+
+  #bracket {
+    text-align: center;
+  }
+
+  /* Add spacing between the "Add Name" button and the "Number of entries" box */
+  #addNameBtn {
+    margin-bottom: 10px;
+  }
+</style>
 </head>
 <body>
-<h1>Match Generator</h1>
-<form onsubmit="return generate()">
-<input type="number" id="entries" name="entries" placeholder="Number of entries">
-<input type="submit" value="Generate">
+<h1>VS. Generator</h1>
+<form onsubmit="return false">
+  <!-- <div id="addNameBtn">
+    <button onclick="addName()">Add Name</button>
+  </div> -->
+  <label for="entries">Number of entries:</label>
+  <input type="number" id="entries" name="entries" placeholder="Number of entries" min="1" onchange="updateNames()">
+  <br>
+  <div id="nameList"></div>
+  <button onclick="generate()">Generate VS.</button>
+  <br>
+  <button onclick="resetForm()">Reset</button> <!-- Added Reset button -->
 </form>
 <div id="bracket"></div>
 <script>
+var namesArray = [];
+
+function addName() {
+  var nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.placeholder = "Enter name";
+
+  var removeButton = document.createElement("button");
+  removeButton.textContent = "Remove";
+  removeButton.onclick = function() {
+    removeName(nameInput);
+  };
+
+  var nameContainer = document.createElement("div");
+  nameContainer.appendChild(nameInput);
+  nameContainer.appendChild(removeButton);
+
+  var nameListDiv = document.getElementById("nameList");
+  nameListDiv.appendChild(nameContainer);
+  namesArray.push(nameInput);
+}
+
+function removeName(nameInput) {
+  var nameListDiv = document.getElementById("nameList");
+  var nameContainer = nameInput.parentElement;
+  nameListDiv.removeChild(nameContainer);
+
+  var index = namesArray.indexOf(nameInput);
+  if (index !== -1) {
+    namesArray.splice(index, 1);
+  }
+}
+
+function updateNames() {
+  var entries = parseInt(document.getElementById("entries").value);
+  var nameListDiv = document.getElementById("nameList");
+
+  // Remove existing name inputs
+  while (nameListDiv.firstChild) {
+    nameListDiv.removeChild(nameListDiv.firstChild);
+  }
+
+  namesArray = [];
+
+  // Add new name inputs based on the entered number of entries
+  for (var i = 0; i <= entries; i++) {
+    addName();
+  }
+}
+
 function generate() {
   var entries = parseInt(document.getElementById("entries").value);
   var pairs = [];
-  
+
+  if (entries < 1) {
+    alert("Please enter a valid number of entries (minimum 1).");
+    return false;
+  }
+
+
+  // Validate if names are provided for all entries
+  for (var i = 0; i < namesArray.length; i++) {
+    var nameInput = namesArray[i];
+    var name = nameInput.value.trim();
+    if (name === "") {
+      var entryIndex = i + 1;
+      alert("Please provide a name for Entry " + entryIndex);
+      return false;
+    }
+  }
+
   // Generate pairs
   var availableEntries = Array.from({ length: entries }, (_, i) => i + 1);
   while (availableEntries.length > 1) {
@@ -33,23 +201,35 @@ function generate() {
   }
 
   // Create bracket visualization
-  var bracketHTML = "<h2>Matches</h2><ul>";
+  var bracketHTML = "<h2>Bracket</h2><ul>";
   for (var round = 0; round < pairs.length; round++) {
     var match = pairs[round];
     var entry1 = match[0];
     var entry2 = match[1];
 
-    var entry1Text = entry1 === -1 ? "Bye" : "Entry " + entry1;
-    var entry2Text = entry2 === -1 ? "Bye" : "Entry " + entry2;
+    var entry1Text = entry1 === -1 ? "Bye" : namesArray[entry1 - 1].value;
+    var entry2Text = entry2 === -1 ? "Bye" : namesArray[entry2 - 1].value;
 
-    bracketHTML += "<li>Match " + (round + 1) + ": " + entry1Text + " vs " + entry2Text + "</li>";
+    bracketHTML += "<li>Round " + (round + 1) + ": " + entry1Text + " vs " + entry2Text + "</li>";
   }
   bracketHTML += "</ul>";
 
   document.getElementById("bracket").innerHTML = bracketHTML;
+}
 
-  // Prevent form submission
-  return false;
+function resetForm() {
+  // Remove existing name inputs
+  var nameListDiv = document.getElementById("nameList");
+  while (nameListDiv.firstChild) {
+    nameListDiv.removeChild(nameListDiv.firstChild);
+  }
+  namesArray = [];
+
+  // Reset the "Number of entries" input
+  document.getElementById("entries").value = "";
+
+  // Clear the bracket visualization
+  document.getElementById("bracket").innerHTML = "";
 }
 </script>
 </body>

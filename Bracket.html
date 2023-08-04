@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sports Bracket Generator</title>
+</head>
+<body>
+<h1>Sports Bracket Generator</h1>
+<form action="/generate" method="post">
+<input type="number" name="entries" placeholder="Number of entries">
+<input type="submit" value="Generate">
+</form>
+<script>
+function generate() {
+var entries = document.getElementById("entries").value;
+var pairs = [];
+for (var i = 0; i < entries; i++) {
+var opponent = Math.floor(Math.random() * entries);
+if (opponent == i) {
+opponent = (opponent + 1) % entries;
+}
+pairs.push([i, opponent]);
+}
+if (entries % 2 == 1) {
+// Add a bye
+pairs.push([entries - 1, -1]);
+}
+document.getElementById("pairs").innerHTML = pairs.join(", ");
+}
+</script>
+<div id="pairs"></div>
+</body>
+</html>
